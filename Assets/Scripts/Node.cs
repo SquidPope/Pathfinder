@@ -74,27 +74,34 @@ public class Node : MonoBehaviour
     //ToDo: on mouse click, give self to NodeManager as goalNode for a move - NodeManager keeps track of start on its own || on left click self is start?
 
     //ToDo: have a single enum handle states instead of bools, they're all mutually exclusive.
-    public void ChangeColor(bool inPath, bool start, bool goal)
+    public void ChangeColor(bool onPath)
     {
         if (!walkable)
         {
             renderer.material.color = Color.gray;
-            return;
         }
-
-        if (start)
-            renderer.material.color = Color.cyan;
-        else if (goal)
-            renderer.material.color = Color.blue;
-        else if (inPath)
-            renderer.material.color = Color.green;
         else
-            renderer.material.color = Color.white;
+        {
+            if (onPath)
+                renderer.material.color = Color.green;
+            else
+                renderer.material.color = Color.blue;
+        }
     }
 
     //ToDo: remove when not needed for debugging
     public void ChangeColor(Color c)
     {
         renderer.material.color = c;
+    }
+
+    //ToDo: remove when not needed for debugging
+    void OnMouseDown()
+    {
+        Debug.Log("click");
+        foreach (Node n in adjacentNodes)
+        {
+            n.ChangeColor(Color.magenta);
+        }
     }
 }

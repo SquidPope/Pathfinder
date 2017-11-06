@@ -5,15 +5,19 @@ public class A_Star : MonoBehaviour
 {
     //ToDo: Make sure we test for startNode == goalNode and just exit (in case I decide to choose starts and goals on the fly with a click)
 
+    //If we race algorithms, we should have a 'timer' showing how many miliseconds (and steps) each takes, as well as the final path
+    //Add a way to see all the nodes that were checked as well as the final path.
+
     bool pathFound = false; //limit to once per run for now.
 
     List<Node> openList;
     List<Node> closedList;
 
-    //ToDo: have NodeManager do this instead.
+    public Node start;
+    public Node goal;
+
     void Start()
     {
-        //ToDo: generate a map? (find a way to prevent it from making impossible ones?)
         openList = new List<Node>();
         closedList = new List<Node>();
     }
@@ -22,15 +26,23 @@ public class A_Star : MonoBehaviour
     {
         
         //ToDo: remove hardcoding
-        Node start = NodeManager.Instance.GetNode(0, 0);
-        start.ChangeColor(false, true, false);
-        Node goal = NodeManager.Instance.GetNode(2, 3);
-        goal.ChangeColor(false, false, true);
+        start = NodeManager.Instance.GetNode(0, 0);
+        goal = NodeManager.Instance.GetNode(2, 3);
+
+        start.ChangeColor(Color.blue);
 
         Node current = start;
+        int nodesTraveled = 0;
 
+        int failsafe = 0;
         do
         {
+            Node lowestF = GetNodeWithLowestF();
+            nodesTraveled++;
+
+            if (lowestF != null)
+                current = lowestF;
+
             if (openList.Contains(current))
                 openList.Remove(current);
 
@@ -46,57 +58,64 @@ public class A_Star : MonoBehaviour
                 adjacentNodes = NodeManager.Instance.GetAdjacentNodes(current);
                 current.AdjacentNodes = adjacentNodes;
             }
-
+            
             if (adjacentNodes.Contains(goal))
             {
                 goal.PreviousNode = current;
                 current = goal;
                 closedList.Add(current);
+                break;
             }
             else
             {
                 foreach (Node n in adjacentNodes)
                 {
                     //ToDo: walkable check
-                    if (n == null)
-                        Debug.Log("broken foreach loop");
-
-                    n.G = closedList.Count;
-                    n.H = GetHeuristic(n, goal);
-                    n.F = n.G + n.H;
+                    if (closedList.Contains(n))
+                        continue;
 
                     if (!openList.Contains(n))
                     {
                         openList.Add(n);
+                        n.G = current.G + 1;
+                        n.H = GetHeuristic(n, goal);
+                        Debug.Log("heuristic: " + n.H);
+
+                        n.F = n.H + n.G;
+                        n.PreviousNode = current;
                     }
-                    //else check if f is lower with the current path
-                    
-                }
+                    else
+                    {
+                        //Using n's H value here because the heuristic shouldn't change.
+                        int f = n.H + current.G + 1;
+                        if (n.F >= f)
+                        {
+                            n.PreviousNode = current;
+                            n.G = current.G + 1;
+                            n.F = f;
+                        }
+                        else
+                        {
+                            //if n.F < f it means the other path to this node is better.
+                            Debug.Log("alternate path better");
+                        }
 
-                //find node in openList where n.F is lowest
-                Node lowestF = openList[0];
-                for (int i = 1; i > openList.Count; i++)
-                {
-                    if (openList[i].F < lowestF.F)
-                        lowestF = openList[i];
+                    } 
                 }
-
-                lowestF.PreviousNode = current;
-                current = lowestF;
             }
+            failsafe++;
 
-        } while (openList.Count > 0 && !closedList.Contains(goal)); //openList having a count <= 0 means there isn't a path (or I've really screwed something)
+            Debug.Log("openList count: " + openList.Count);
+
+        } while (openList.Count > 0); //openList having a count <= 0 means there isn't a path (or I've really screwed something)
 
         //highlight the calculated path
-        /*
-        foreach (Node node in closedList)
-        {
-            node.ChangeColor(true, false, false);
-        }
-        */
         while (current != start && current.PreviousNode != null)
         {
-            current.ChangeColor(true, false, false);
+            if (current == null)
+                break;
+
+            current.ChangeColor(true);
             current = current.PreviousNode;
         }
 
@@ -110,6 +129,24 @@ public class A_Star : MonoBehaviour
 
         //To scale use d * (d*x + d*y) where d is scale.
         return Mathf.RoundToInt(x + y);
+    }
+
+    Node GetNodeWithLowestF()
+    {
+        if (openList.Count <= 0)
+            return null;
+
+        Node lowestF = openList[0];
+        if (openList.Count > 0)
+        {
+            for (int i = 0; i > openList.Count; i++)
+            {
+                if (openList[i].F < lowestF.F)
+                    lowestF = openList[i];
+            }
+        }
+
+        return lowestF;
     }
 
     void Update()
