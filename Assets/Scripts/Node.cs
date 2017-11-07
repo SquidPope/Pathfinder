@@ -8,31 +8,26 @@ public class Node : MonoBehaviour
     Vector2 mapPos;
 
     //A*
-    int f = 0;
-    int g = 0;
-    int h = 0;
+    public int f = 0;
+    public int g = 0;
+    public int h = 0;
 
     List<Node> adjacentNodes;
     Node previousNode;
 
     Renderer renderer;
 
-    public int F
+    public bool Walkable
     {
-        get { return f; }
-        set { f = value; }
-    }
-
-    public int G
-    {
-        get { return g; }
-        set { g = value; }
-    }
-
-    public int H
-    {
-        get { return h; }
-        set { h = value; }
+        get { return walkable; }
+        set
+        {
+            walkable = value;
+            if (walkable)
+                ChangeColor(Color.white);
+            else
+                ChangeColor(Color.gray);
+        }
     }
 
     public Vector2 MapPos
@@ -78,14 +73,14 @@ public class Node : MonoBehaviour
     {
         if (!walkable)
         {
-            renderer.material.color = Color.gray;
+            return;
         }
         else
         {
             if (onPath)
                 renderer.material.color = Color.green;
             else
-                renderer.material.color = Color.blue;
+                renderer.material.color = Color.red;
         }
     }
 
@@ -93,15 +88,5 @@ public class Node : MonoBehaviour
     public void ChangeColor(Color c)
     {
         renderer.material.color = c;
-    }
-
-    //ToDo: remove when not needed for debugging
-    void OnMouseDown()
-    {
-        Debug.Log("click");
-        foreach (Node n in adjacentNodes)
-        {
-            n.ChangeColor(Color.magenta);
-        }
     }
 }

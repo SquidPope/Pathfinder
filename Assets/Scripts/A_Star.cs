@@ -8,31 +8,47 @@ public class A_Star : MonoBehaviour
     //If we race algorithms, we should have a 'timer' showing how many miliseconds (and steps) each takes, as well as the final path
     //Add a way to see all the nodes that were checked as well as the final path.
 
-    bool pathFound = false; //limit to once per run for now.
-
     List<Node> openList;
     List<Node> closedList;
 
     public Node start;
     public Node goal;
 
+    static A_Star instance;
+    public static A_Star Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                GameObject go = GameObject.FindGameObjectWithTag("A_Star");
+                instance = go.GetComponent<A_Star>();
+            }
+
+            return instance;
+        }
+    }
+
     void Start()
     {
         openList = new List<Node>();
         closedList = new List<Node>();
+
     }
 
     void FindPath() //start and goal should probably be node objects and not just positions
     {
-        
-        //ToDo: remove hardcoding
-        start = NodeManager.Instance.GetNode(0, 0);
-        goal = NodeManager.Instance.GetNode(2, 3);
+        if (start == null)
+            start = NodeManager.Instance.GetNode(0, 0);
+
+        if (goal == null)
+            goal = NodeManager.Instance.GetNode(2, 3);
 
         start.ChangeColor(Color.blue);
 
         Node current = start;
         int nodesTraveled = 0;
+        bool pathFound = false;
 
         int failsafe = 0;
         do
@@ -64,35 +80,40 @@ public class A_Star : MonoBehaviour
                 goal.PreviousNode = current;
                 current = goal;
                 closedList.Add(current);
+                pathFound = true;
                 break;
             }
             else
             {
                 foreach (Node n in adjacentNodes)
                 {
-                    //ToDo: walkable check
                     if (closedList.Contains(n))
                         continue;
+
+                    if (!n.Walkable)
+                    {
+                        closedList.Add(n);
+                        continue;
+                    }
 
                     if (!openList.Contains(n))
                     {
                         openList.Add(n);
-                        n.G = current.G + 1;
-                        n.H = GetHeuristic(n, goal);
-                        Debug.Log("heuristic: " + n.H);
+                        n.g = current.g + 1;
+                        n.h = GetHeuristic(n, goal);
 
-                        n.F = n.H + n.G;
+                        n.f = n.h + n.g;
                         n.PreviousNode = current;
                     }
                     else
                     {
                         //Using n's H value here because the heuristic shouldn't change.
-                        int f = n.H + current.G + 1;
-                        if (n.F >= f)
+                        int f = n.h + current.g + 1;
+                        if (n.f >= f)
                         {
                             n.PreviousNode = current;
-                            n.G = current.G + 1;
-                            n.F = f;
+                            n.g = current.g + 1;
+                            n.f = f;
                         }
                         else
                         {
@@ -105,8 +126,6 @@ public class A_Star : MonoBehaviour
             }
             failsafe++;
 
-            Debug.Log("openList count: " + openList.Count);
-
         } while (openList.Count > 0); //openList having a count <= 0 means there isn't a path (or I've really screwed something)
 
         //highlight the calculated path
@@ -115,7 +134,7 @@ public class A_Star : MonoBehaviour
             if (current == null)
                 break;
 
-            current.ChangeColor(true);
+            current.ChangeColor(pathFound);
             current = current.PreviousNode;
         }
 
@@ -141,7 +160,7 @@ public class A_Star : MonoBehaviour
         {
             for (int i = 0; i > openList.Count; i++)
             {
-                if (openList[i].F < lowestF.F)
+                if (openList[i].f < lowestF.f)
                     lowestF = openList[i];
             }
         }
@@ -151,13 +170,10 @@ public class A_Star : MonoBehaviour
 
     void Update()
     {
-        if (pathFound)
-            return;
-
+        //ToDo: decide if we want to limit how frequently this can be called.
         if(Input.GetKeyUp(KeyCode.Space))
         {
             FindPath();
-            pathFound = true;
         }
     }
 }
