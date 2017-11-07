@@ -13,5 +13,8 @@ public class InputManager : MonoBehaviour
             //get node clicked on
             //tell node to tell adjacent nodes to change color
         }
+
+        if (Input.GetKeyUp(KeyCode.Escape))
+            Application.Quit();
 	}
 }
