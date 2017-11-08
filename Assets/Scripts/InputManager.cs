@@ -45,6 +45,11 @@ public class InputManager : MonoBehaviour
             }
         }
 
+        if (Input.GetKeyUp(KeyCode.R))
+        {
+            A_Star.Instance.Reset();
+        }
+
         if (Input.GetKeyUp(KeyCode.Escape))
             Application.Quit();
 	}

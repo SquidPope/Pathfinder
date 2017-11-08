@@ -84,6 +84,12 @@ public class Node : MonoBehaviour
         }
     }
 
+    public void Reset()
+    {
+        walkable = true;
+        renderer.material.color = Color.white;
+    }
+
     //ToDo: remove when not needed for debugging
     public void ChangeColor(Color c)
     {

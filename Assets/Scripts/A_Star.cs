@@ -168,6 +168,17 @@ public class A_Star : MonoBehaviour
         return lowestF;
     }
 
+    public void Reset()
+    {
+        for (int i = 0; i < closedList.Count; i++)
+        {
+            closedList[i].Reset();
+        }
+
+        openList.Clear();
+        closedList.Clear();
+    }
+
     void Update()
     {
         //ToDo: decide if we want to limit how frequently this can be called.
