@@ -5,5 +5,5 @@ To run this project:
 1. Download the .zip or .rar file for your operating system
 2. Unzip the file, making sure that the Pathfinder_Data folder ends up in the same folder as the executable
 3. Run the executable
-4. Press the spacebar to generate a path
+4. Click the "Run A*" or "Run Greedy Best First" to select and run an algorithm
 5. Use the escape key to close the application
