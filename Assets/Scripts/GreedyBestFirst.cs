@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class A_Star : MonoBehaviour
+public class GreedyBestFirst : MonoBehaviour
 {
-    //ToDo: Make sure we test for startNode == goalNode and just exit (in case I decide to choose starts and goals on the fly with a click)
-
-    //If we race algorithms, we should have a 'timer' showing how many miliseconds (and steps) each takes, as well as the final path
-    //Add a way to see all the nodes that were checked as well as the final path.
+    /*
+     * Like A* but only cares about heuristic
+     * 
+     */
 
     List<Node> openList;
     List<Node> closedList;
@@ -14,15 +14,15 @@ public class A_Star : MonoBehaviour
     public Node start;
     public Node goal;
 
-    static A_Star instance;
-    public static A_Star Instance
+    static GreedyBestFirst instance;
+    public static GreedyBestFirst Instance
     {
         get
         {
             if (instance == null)
             {
-                GameObject go = GameObject.FindGameObjectWithTag("A_Star");
-                instance = go.GetComponent<A_Star>();
+                GameObject go = GameObject.FindGameObjectWithTag("GreedyBestFirst");
+                instance = go.GetComponent<GreedyBestFirst>();
             }
 
             return instance;
@@ -31,13 +31,13 @@ public class A_Star : MonoBehaviour
 
     void Start()
     {
-        openList = new List<Node>();
         closedList = new List<Node>();
-
+        openList = new List<Node>();
     }
 
-    public void FindPath() //start and goal should probably be node objects and not just positions
+    public void FindPath()
     {
+
         if (start == null)
             start = NodeManager.Instance.GetNode(0, 0);
 
@@ -49,11 +49,6 @@ public class A_Star : MonoBehaviour
 
         do
         {
-            Node lowestF = GetNodeWithLowestF();
-
-            if (lowestF != null)
-                current = lowestF;
-
             if (openList.Contains(current))
                 openList.Remove(current);
 
@@ -69,7 +64,7 @@ public class A_Star : MonoBehaviour
                 adjacentNodes = NodeManager.Instance.GetAdjacentNodes(current);
                 current.AdjacentNodes = adjacentNodes;
             }
-            
+
             if (adjacentNodes.Contains(goal))
             {
                 goal.PreviousNode = current;
@@ -92,35 +87,24 @@ public class A_Star : MonoBehaviour
                     }
 
                     if (!openList.Contains(n))
-                    {
                         openList.Add(n);
-                        n.g = current.g + n.Cost;
-                        n.h = GetHeuristic(n, goal);
 
-                        n.f = n.h + n.g;
-                        n.PreviousNode = current;
-                    }
-                    else
+                    if (n.h <= 0)
                     {
-                        //Using n's H value here because the heuristic shouldn't change.
-                        int f = n.h + current.g + n.Cost;
-                        if (n.f >= f)
-                        {
-                            n.PreviousNode = current;
-                            n.g = current.g + n.Cost;
-                            n.f = f;
-                        }
-                        else
-                        {
-                            //if n.F < f it means the other path to this node is better.
-                            Debug.Log("alternate path better");
-                        }
-
+                        n.h = GetHeuristic(n, goal);
                     }
                 }
             }
 
-        } while (openList.Count > 0); //openList having a count <= 0 means there isn't a path (or I've really screwed something)
+            Node lowestH = GetLowestH();
+
+            if (lowestH != null)
+            {
+                lowestH.PreviousNode = current;
+                current = lowestH;
+            }
+
+        } while (openList.Count > 0);
 
         //highlight the calculated path
         while (current != start && current.PreviousNode != null)
@@ -133,8 +117,24 @@ public class A_Star : MonoBehaviour
 
             current = current.PreviousNode;
         }
+    }
 
-        //should this function move the "character" or should it just return the path?
+    Node GetLowestH()
+    {
+        if (openList.Count <= 0)
+            return null;
+
+        Node lowestH = openList[0];
+        if (openList.Count > 0)
+        {
+            for (int i = 0; i > openList.Count; i++)
+            {
+                if (openList[i].h < lowestH.h)
+                    lowestH = openList[i];
+            }
+        }
+
+        return lowestH;
     }
 
     int GetHeuristic(Node current, Node goal)
@@ -146,24 +146,6 @@ public class A_Star : MonoBehaviour
         return Mathf.RoundToInt(x + y);
     }
 
-    Node GetNodeWithLowestF()
-    {
-        if (openList.Count <= 0)
-            return null;
-
-        Node lowestF = openList[0];
-        if (openList.Count > 0)
-        {
-            for (int i = 0; i > openList.Count; i++)
-            {
-                if (openList[i].f < lowestF.f)
-                    lowestF = openList[i];
-            }
-        }
-
-        return lowestF;
-    }
-
     public void Reset(bool keepMap)
     {
         for (int i = 0; i < closedList.Count; i++)
@@ -173,7 +155,6 @@ public class A_Star : MonoBehaviour
                 if (closedList[i] == start || closedList[i] == goal)
                     continue;
             }
-
             closedList[i].Reset(keepMap);
         }
 

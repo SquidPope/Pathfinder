@@ -4,6 +4,7 @@ using UnityEngine;
 public class Node : MonoBehaviour
 {
     bool walkable = true;
+    int cost = 1;
 
     Vector2 mapPos;
 
@@ -27,6 +28,19 @@ public class Node : MonoBehaviour
                 ChangeColor(Color.white);
             else
                 ChangeColor(Color.gray);
+        }
+    }
+
+    public int Cost
+    {
+        get { return cost; }
+        set
+        {
+            cost = value;
+            if (cost > 1)
+            {
+                ChangeColor(Color.cyan);
+            }
         }
     }
 
@@ -84,10 +98,22 @@ public class Node : MonoBehaviour
         }
     }
 
-    public void Reset()
+    public void Reset(bool keepWalls)
     {
-        walkable = true;
-        renderer.material.color = Color.white;
+        if (keepWalls)
+        {
+            if (walkable)
+                renderer.material.color = Color.white;
+
+            if (cost > 1)
+                renderer.material.color = Color.cyan;
+        }
+        else
+        {
+            walkable = true;
+            cost = 1;
+            renderer.material.color = Color.white;
+        }
     }
 
     //ToDo: remove when not needed for debugging

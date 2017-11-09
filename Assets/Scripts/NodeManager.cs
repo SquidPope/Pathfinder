@@ -12,8 +12,8 @@ public class NodeManager : MonoBehaviour
     [SerializeField]
     int mapHeight;
 
-    float offsetX = 1;
-    float offsetY = 1;
+    float offsetX = 0.5f;
+    float offsetY = 0.5f;
 
     Node[,] nodes; //2D map of Nodes so I can find the adjacent nodes for a given node
 
