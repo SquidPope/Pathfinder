@@ -338,8 +338,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 645e367117a0e344784025282001c7e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  start: {fileID: 0}
-  goal: {fileID: 0}
 --- !u!4 &364855734
 Transform:
   m_ObjectHideFlags: 0
@@ -1208,7 +1206,7 @@ GameObject:
   - component: {fileID: 1183591991}
   m_Layer: 0
   m_Name: InputManager
-  m_TagString: Untagged
+  m_TagString: InputManager
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1225,6 +1223,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   KeepMap: {fileID: 43704676}
+  start: {fileID: 0}
+  goal: {fileID: 0}
 --- !u!4 &1183591992
 Transform:
   m_ObjectHideFlags: 0
@@ -1550,8 +1550,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07b2c92eb757521459c1f9b1d9941599, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  start: {fileID: 0}
-  goal: {fileID: 0}
 --- !u!4 &2063840166
 Transform:
   m_ObjectHideFlags: 0

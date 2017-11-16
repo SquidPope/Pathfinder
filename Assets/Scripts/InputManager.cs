@@ -1,13 +1,29 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
+public enum NodeType { empty, start, goal, slow, wall }
 public class InputManager : MonoBehaviour
 {
-    //ToDo: some way to let the user place walls on the map?
-    //ToDo: some way to let the user place the start and end points on the map
-
     [SerializeField]
     Toggle KeepMap;
+
+    public Node start;
+    public Node goal;
+
+    static InputManager instance;
+    public static InputManager Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                GameObject go = GameObject.FindGameObjectWithTag("InputManager");
+                instance = go.GetComponent<InputManager>();
+            }
+
+            return instance;
+        }
+    }
 
 	void Update()
     {
@@ -16,13 +32,11 @@ public class InputManager : MonoBehaviour
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero, 0f);
             if (hit.collider != null)
             {
-                if (A_Star.Instance.start != null)
-                    A_Star.Instance.start.ChangeColor(Color.white);
+                if (start != null)
+                    ChangeNodeType(start, NodeType.empty);
 
                 Node node = hit.collider.gameObject.GetComponent<Node>();
-                node.Walkable = true;
-                node.ChangeColor(Color.blue);
-                A_Star.Instance.start = node;
+                ChangeNodeType(node, NodeType.start);
             }
         }
 
@@ -31,13 +45,11 @@ public class InputManager : MonoBehaviour
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero, 0f);
             if (hit.collider != null)
             {
-                if (A_Star.Instance.goal != null)
-                    A_Star.Instance.goal.ChangeColor(Color.white);
+                if (goal != null)
+                    ChangeNodeType(goal, NodeType.empty);
 
                 Node node = hit.collider.gameObject.GetComponent<Node>();
-                node.Walkable = true;
-                node.ChangeColor(Color.blue);
-                A_Star.Instance.goal = node;
+                ChangeNodeType(node, NodeType.goal);
             }
         }
 
@@ -76,7 +88,6 @@ public class InputManager : MonoBehaviour
             Application.Quit();
 	}
 
-    //ToDo: option to remove walls
     public void Reset()
     {
         A_Star.Instance.Reset(KeepMap.isOn);
@@ -91,5 +102,51 @@ public class InputManager : MonoBehaviour
     public void RunGreedyBestFirst()
     {
         GreedyBestFirst.Instance.FindPath();
+    }
+
+    public void ChangeNodeType(Node node, NodeType type)
+    {
+        if (node.Type == NodeType.start)
+            start = null;
+        if (node.Type == NodeType.goal)
+            goal = null;
+
+        node.Type = type;
+        node.Walkable = true;
+
+        switch (type)
+        {
+            case NodeType.empty:
+                {
+                    node.Cost = 1;
+                    break;
+                }
+            case NodeType.goal:
+                {
+                    goal = node;
+                    break;
+                }
+            case NodeType.slow:
+                {
+                    node.Cost = 5; //ToDo: remove hardcoding
+                    break;
+                }
+            case NodeType.start:
+                {
+                    start = node;
+                    break;
+                }
+            case NodeType.wall:
+                {
+                    node.Walkable = false;
+                    break;
+                }
+            default:
+                {
+                    break;
+                }
+        }
+
+        node.ChangeColorByType();
     }
 }

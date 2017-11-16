@@ -11,9 +11,6 @@ public class GreedyBestFirst : MonoBehaviour
     List<Node> openList;
     List<Node> closedList;
 
-    public Node start;
-    public Node goal;
-
     static GreedyBestFirst instance;
     public static GreedyBestFirst Instance
     {
@@ -37,6 +34,8 @@ public class GreedyBestFirst : MonoBehaviour
 
     public void FindPath()
     {
+        Node start = InputManager.Instance.start;
+        Node goal = InputManager.Instance.goal;
 
         if (start == null)
             start = NodeManager.Instance.GetNode(0, 0);
@@ -150,11 +149,6 @@ public class GreedyBestFirst : MonoBehaviour
     {
         for (int i = 0; i < closedList.Count; i++)
         {
-            if (keepMap)
-            {
-                if (closedList[i] == start || closedList[i] == goal)
-                    continue;
-            }
             closedList[i].Reset(keepMap);
         }
 

@@ -11,9 +11,6 @@ public class A_Star : MonoBehaviour
     List<Node> openList;
     List<Node> closedList;
 
-    public Node start;
-    public Node goal;
-
     static A_Star instance;
     public static A_Star Instance
     {
@@ -36,8 +33,11 @@ public class A_Star : MonoBehaviour
 
     }
 
-    public void FindPath() //start and goal should probably be node objects and not just positions
+    public void FindPath()
     {
+        Node start = InputManager.Instance.start;
+        Node goal = InputManager.Instance.goal;
+
         if (start == null)
             start = NodeManager.Instance.GetNode(0, 0);
 
@@ -110,19 +110,14 @@ public class A_Star : MonoBehaviour
                             n.g = current.g + n.Cost;
                             n.f = f;
                         }
-                        else
-                        {
-                            //if n.F < f it means the other path to this node is better.
-                            Debug.Log("alternate path better");
-                        }
-
+                        //If n.F < f it means the other path to this node is better.
                     }
                 }
             }
 
         } while (openList.Count > 0); //openList having a count <= 0 means there isn't a path (or I've really screwed something)
 
-        //highlight the calculated path
+        //Highlight the calculated path
         while (current != start && current.PreviousNode != null)
         {
             if (current == null)
@@ -133,8 +128,6 @@ public class A_Star : MonoBehaviour
 
             current = current.PreviousNode;
         }
-
-        //should this function move the "character" or should it just return the path?
     }
 
     int GetHeuristic(Node current, Node goal)
@@ -168,12 +161,6 @@ public class A_Star : MonoBehaviour
     {
         for (int i = 0; i < closedList.Count; i++)
         {
-            if (keepMap)
-            {
-                if (closedList[i] == start || closedList[i] == goal)
-                    continue;
-            }
-
             closedList[i].Reset(keepMap);
         }
 

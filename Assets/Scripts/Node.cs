@@ -13,6 +13,8 @@ public class Node : MonoBehaviour
     public int g = 0;
     public int h = 0;
 
+    NodeType type = NodeType.empty;
+
     List<Node> adjacentNodes;
     Node previousNode;
 
@@ -23,11 +25,14 @@ public class Node : MonoBehaviour
         get { return walkable; }
         set
         {
+            if (walkable == value)
+                return;
+
             walkable = value;
             if (walkable)
-                ChangeColor(Color.white);
+                Type = NodeType.empty;
             else
-                ChangeColor(Color.gray);
+                Type = NodeType.wall;
         }
     }
 
@@ -39,8 +44,22 @@ public class Node : MonoBehaviour
             cost = value;
             if (cost > 1)
             {
-                ChangeColor(Color.cyan);
+                Type = NodeType.slow;
             }
+            else
+            {
+                Type = NodeType.empty;
+            }
+        }
+    }
+
+    public NodeType Type
+    {
+        get { return type; }
+        set
+        {
+           type = value;
+            ChangeColorByType();
         }
     }
 
@@ -76,13 +95,6 @@ public class Node : MonoBehaviour
         return transform.position;
     }
 
-    //Raycast for H?
-
-    //Raycast for adjacent Nodes?
-
-    //ToDo: on mouse click, give self to NodeManager as goalNode for a move - NodeManager keeps track of start on its own || on left click self is start?
-
-    //ToDo: have a single enum handle states instead of bools, they're all mutually exclusive.
     public void ChangeColor(bool onPath)
     {
         if (!walkable)
@@ -98,27 +110,53 @@ public class Node : MonoBehaviour
         }
     }
 
-    public void Reset(bool keepWalls)
+    public void Reset(bool keepMap)
     {
-        if (keepWalls)
+        if (keepMap)
         {
-            if (walkable)
-                renderer.material.color = Color.white;
-
-            if (cost > 1)
-                renderer.material.color = Color.cyan;
+            InputManager.Instance.ChangeNodeType(this, type);
         }
         else
         {
-            walkable = true;
-            cost = 1;
-            renderer.material.color = Color.white;
+            InputManager.Instance.ChangeNodeType(this, NodeType.empty);
         }
     }
 
-    //ToDo: remove when not needed for debugging
-    public void ChangeColor(Color c)
+    public void ChangeColorByType()
     {
+        Color c = Color.white;
+        switch (type)
+        {
+            case NodeType.empty:
+                {
+                    break;
+                }
+            case NodeType.goal:
+                {
+                    c = Color.yellow;
+                    break;
+                }
+            case NodeType.slow:
+                {
+                    c = Color.cyan;
+                    break;
+                }
+            case NodeType.start:
+                {
+                    c = Color.blue;
+                    break;
+                }
+            case NodeType.wall:
+                {
+                    c = Color.gray;
+                    break;
+                }
+            default:
+                {
+                    break;
+                }
+        }
+
         renderer.material.color = c;
     }
 }
